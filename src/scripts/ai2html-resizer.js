@@ -1,33 +1,62 @@
 /**
- * Resizer script to toggle multiple artboards for responsiveness. Adapted from:
+ * Resizer script to toggle between pre-generated SVG artboards for
+ * responsiveness. Adapted from:
  * https://github.com/newsdev/ai2html/blob/gh-pages/_includes/resizer-script.html
+ *
+ * Each artboard is shown when the width of its container falls within its
+ * breakpoint range below. Artboard 1 = desktop, 2 = tablet, 3 = mobile.
  */
 
-function resizer() {
-  const elements = document.querySelectorAll('.g-artboard[data-min-width]');
-  const widthById = {};
+import artboard1 from '../assets/artboard-1.svg';
+import artboard2 from '../assets/artboard-2.svg';
+import artboard3 from '../assets/artboard-3.svg';
 
-  elements.forEach(el => {
-    const parent = el.parentNode;
-    const width = widthById[parent.id] || parent.getBoundingClientRect().width;
-    const minwidth = el.getAttribute('data-min-width');
-    const maxwidth = el.getAttribute('data-max-width');
+const BREAKPOINTS = {
+  1: { min: 600, max: Infinity },
+  2: { min: 400, max: 599 },
+  3: { min: 0, max: 399 },
+};
 
-    widthById[parent.id] = width;
-    if (+minwidth <= width && (+maxwidth >= width || maxwidth === null)) {
-      el.style.display = 'block';
-    } else {
-      el.style.display = 'none';
-    }
+const SVG_URLS = { 1: artboard1, 2: artboard2, 3: artboard3 };
+
+/**
+ * Inline each SVG into its artboard so the text picks up the page's fonts
+ * (an SVG loaded through <img> can't use web fonts).
+ */
+function loadArtboards() {
+  const artboards = document.querySelectorAll('.svg-artboard[data-artboard]');
+
+  artboards.forEach(el => {
+    fetch(SVG_URLS[el.getAttribute('data-artboard')])
+      .then(res => res.text())
+      .then(svg => {
+        el.innerHTML = svg;
+      });
   });
 }
 
-// Export ai2html resizer initialization to page.js
+function resizer() {
+  const containers = document.querySelectorAll('.svg-graphic');
+
+  containers.forEach(container => {
+    const width = container.getBoundingClientRect().width;
+    const artboards = container.querySelectorAll('.svg-artboard[data-artboard]');
+
+    artboards.forEach(el => {
+      const range = BREAKPOINTS[el.getAttribute('data-artboard')];
+      const visible = range && width >= range.min && width <= range.max;
+      el.style.display = visible ? 'block' : 'none';
+    });
+  });
+}
+
+// Export SVG resizer initialization to page.js
 export default function () {
   // only want one resizer on the page
-  if (document.documentElement.classList.contains('g-resizer-v3-init')) return;
-  document.documentElement.classList.add('g-resizer-v3-init');
+  if (document.documentElement.classList.contains('svg-resizer-init')) return;
+  document.documentElement.classList.add('svg-resizer-init');
 
+  loadArtboards();
   resizer();
   window.addEventListener('resize', throttle(resizer, 200));
 }

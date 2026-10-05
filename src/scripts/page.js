@@ -5,8 +5,8 @@ import { spectate as spectateConfig } from '../../package.json';
  */
 
 function init() {
-  // If an artboard is on the page, load the ai2html resizer
-  if (document.querySelector('.g-artboard[data-min-width]')) {
+  // If an SVG artboard is on the page, load the resizer
+  if (document.querySelector('.svg-artboard[data-artboard]')) {
     import('./ai2html-resizer').then(p => p.default());
   }
 }

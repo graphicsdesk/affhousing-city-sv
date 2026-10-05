@@ -1,4 +1,16 @@
 @import "./styles/spectate.css";
 
+/* Responsive SVG artboards (toggled by scripts/ai2html-resizer.js) */
+.svg-graphic {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.svg-artboard svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Uncomment the following line before publishing a News story */
 /* @import "./styles/news-ellipsis.css"; */
